@@ -1,7 +1,7 @@
 # Методика расчета затенения окружающей застройки в среде Revit.
 В этом репозитории росбраны скрипты и инструкция по их применению.  
-Скрипты: [https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Dynamo]  
-Инструкция: 
+Скрипты: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Dynamo  
+Инструкция: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Instruction  
 Cемейства:
 ## Общие данные, пошаговая инструкция.
 
