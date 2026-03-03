@@ -2,7 +2,7 @@
 В этом репозитории росбраны скрипты и инструкция по их применению.  
 Скрипты: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Dynamo  
 Инструкция: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Instruction  
-Cемейства:
+Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Family  
 ## Общие данные, пошаговая инструкция.
 
 Настоящая инструкция описывает порядок подготовки модели и выполнения расчета инсоляции или затенения в среде Revit с использованием скрипта.
