@@ -1067,82 +1067,6 @@
       "Description": "Получение канонического вектора оси Z (0; 0; 1)\n\nVector.ZAxis ( ): Vector"
     },
     {
-      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "NodeType": "PythonScriptNode",
-      "Code": "# Enable the use of standard Python libraries\r\nimport math\r\nfrom datetime import datetime, timedelta\r\n\r\n# For example:\r\n# IN[0] = latitude\r\n# IN[1] = longitude\r\n# IN[2] = timezone\r\n# IN[3] = start_datetime_string (\"YYYY-MM-DD HH:MM\")\r\n# IN[4] = end_datetime_string (\"YYYY-MM-DD HH:MM\")\r\n# IN[5] = step_minutes\r\n\r\nlat = IN[0]\r\nlon = IN[1]\r\ntz = IN[2]\r\nstart_dt = datetime.strptime(IN[3], \"%d.%m.%Y %H:%M:%S\")\r\nend_dt = datetime.strptime(IN[4], \"%d.%m.%Y %H:%M:%S\")\r\nstep = IN[5]\r\n\r\n# Define the function to calculate sun position\r\ndef calculate_sun_position(year, month, day, hour, minute, lat, lon, tz):\r\n    \"\"\"\r\n    High-precision calculation of sun position (azimuth and altitude).\r\n    Accuracy is about ±0.05° with correct time and coordinates.\r\n    \"\"\"\r\n    # Convert coordinates\r\n    lat_rad = math.radians(lat)\r\n    lon = float(lon)\r\n\r\n    # Date and time\r\n    dt = datetime(year, month, day, hour, minute)\r\n    day_of_year = dt.timetuple().tm_yday\r\n    time_utc = hour - tz + minute / 60.0\r\n\r\n    # 1. Fractional year (in radians)\r\n    gamma = 2 * math.pi / 365 * (day_of_year - 1 + (time_utc - 12) / 24)\r\n\r\n    # 2. Equation of time (in minutes)\r\n    eqtime = 229.18 * (\r\n        0.000075\r\n        + 0.001868 * math.cos(gamma)\r\n        - 0.032077 * math.sin(gamma)\r\n        - 0.014615 * math.cos(2*gamma)\r\n        - 0.040849 * math.sin(2*gamma)\r\n    )\r\n\r\n    # 3. Solar declination (in radians)\r\n    decl = (\r\n        0.006918\r\n        - 0.399912 * math.cos(gamma)\r\n        + 0.070257 * math.sin(gamma)\r\n        - 0.006758 * math.cos(2*gamma)\r\n        + 0.000907 * math.sin(2*gamma)\r\n        - 0.002697 * math.cos(3*gamma)\r\n        + 0.00148 * math.sin(3*gamma)\r\n    )\r\n\r\n    # 4. Hour Angle\r\n    time_offset = eqtime + 4 * lon\r\n    tst = time_utc * 60 + time_offset\r\n    ha = math.radians(tst / 4 - 180)\r\n\r\n    # 5. Sun Altitude\r\n    altitude_geom = math.degrees(\r\n        math.asin(\r\n            math.sin(lat_rad) * math.sin(decl)\r\n            + math.cos(lat_rad) * math.cos(decl) * math.cos(ha)\r\n        )\r\n    )\r\n\r\n    # 6. Atmospheric refraction\r\n    if altitude_geom > -1:\r\n        refraction = 1.02 / math.tan(math.radians(altitude_geom + 10.3/(altitude_geom + 5.11))) / 60\r\n    else:\r\n        refraction = 0\r\n    altitude = altitude_geom + refraction\r\n\r\n    # 7. Azimuth\r\n    azimuth = math.degrees(\r\n        math.atan2(\r\n            -math.sin(ha),\r\n            math.tan(decl) * math.cos(lat_rad)\r\n            - math.sin(lat_rad) * math.cos(ha)\r\n        )\r\n    )\r\n    azimuth = (azimuth + 360) % 360\r\n\r\n    return azimuth, altitude\r\n\r\n# Define the function to calculate a trajectory over time\r\ndef calculate_sun_trajectory(lat, lon, tz, start_dt, end_dt, step):\r\n    result = []\r\n    current_dt = start_dt\r\n    while current_dt <= end_dt:\r\n        az, alt = calculate_sun_position(\r\n            current_dt.year, current_dt.month, current_dt.day,\r\n            current_dt.hour, current_dt.minute,\r\n            lat, lon, tz\r\n        )\r\n        result.append((current_dt, az, alt))\r\n        current_dt += timedelta(minutes=step)\r\n    return result\r\n\r\n\r\nOUT = calculate_sun_trajectory(lat, lon, tz, start_dt, end_dt, step)",
-      "VariableInputPorts": true,
-      "Id": "82cfe1ce2dc64f5d985b4f8e36ce8cab",
-      "Inputs": [
-        {
-          "Id": "ce76098757674c5dbd9f64fc95841f01",
-          "Name": "IN[0]",
-          "Description": "Input #0",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "a6f86a51a85840ed9a838412a4da8d74",
-          "Name": "IN[1]",
-          "Description": "Input #1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "cf9a2a8427ce428db3993c0338891f6b",
-          "Name": "IN[2]",
-          "Description": "Input #2",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "62ba0d6b9faf4659a3fb1b9869ef6830",
-          "Name": "IN[3]",
-          "Description": "Input #3",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "9a2591444b8b4374aa66dc6e413cea8c",
-          "Name": "IN[4]",
-          "Description": "Input #4",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "e7b8c2b8230844bf8006068fb7fae232",
-          "Name": "IN[5]",
-          "Description": "Input #5",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "a9ce85afa86f4a9a8dd75367d4e6face",
-          "Name": "OUT",
-          "Description": "Результат сценария Python",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Выполнение встроенного сценария IronPython."
-    },
-    {
       "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
       "NodeType": "FunctionNode",
       "FunctionSignature": "Revit.Elements.Element.GetLocation",
@@ -1171,509 +1095,6 @@
       ],
       "Replication": "Auto",
       "Description": "Получение местоположения для имеющегося элемента\n\nElement.GetLocation ( ): Geometry"
-    },
-    {
-      "ConcreteType": "DSRevitNodesUI.SiteLocation, DSRevitNodesUI",
-      "NodeType": "ExtensionNode",
-      "Id": "ce102dda1f124bd98c64d4d13f23031a",
-      "Inputs": [],
-      "Outputs": [
-        {
-          "Id": "639a98cad50044698ecda2dc8e6267dd",
-          "Name": "Location",
-          "Description": "Местоположение текущего проекта Revit.",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Вывод текущего местоположения площадки Revit"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "NodeType": "FunctionNode",
-      "FunctionSignature": "DynamoUnits.Location.Latitude",
-      "Id": "10e0ac715a79499d91756688806fc4ea",
-      "Inputs": [
-        {
-          "Id": "bda8d804ba834c9994f0aa114a7b8626",
-          "Name": "location",
-          "Description": "DynamoUnits.Location",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "dedba0a8b8e34a588b1efd15547b03d0",
-          "Name": "double",
-          "Description": "double",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Location.Latitude: double"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "NodeType": "FunctionNode",
-      "FunctionSignature": "DynamoUnits.Location.Longitude",
-      "Id": "e54cdb8b42c94b5884aeb3a38980a022",
-      "Inputs": [
-        {
-          "Id": "cdba93a3514940e180aacf56d5c8123a",
-          "Name": "location",
-          "Description": "DynamoUnits.Location",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "4455b88adf05465ba2e65702f612d7b2",
-          "Name": "double",
-          "Description": "double",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Location.Longitude: double"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "NodeType": "FunctionNode",
-      "FunctionSignature": "DSCore.DateTime.ByDateAndTime@int,int,int,int,int,int,int",
-      "Id": "2f008d82f9834873b7e89cae63ad19f1",
-      "Inputs": [
-        {
-          "Id": "9a3df689372944eeaa74c0935a97ae75",
-          "Name": "year",
-          "Description": "Точный год (1–9999)\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "7d2959d45e7c46c8a9136c3563e7e071",
-          "Name": "month",
-          "Description": "Точный месяц (1–12)\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "e2ca088925b848928c29cdd21324c514",
-          "Name": "day",
-          "Description": "Точный день (1–[дней в месяце])\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "79629d47c8674834bf83229c7e00b485",
-          "Name": "hour",
-          "Description": "Точное количество часов (0–23)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "b927d6220d714c25aa2dc2a92c965c79",
-          "Name": "minute",
-          "Description": "Точное количество минут (0–59)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "6a6881f589f54ed5acdeae9d86f47e5b",
-          "Name": "second",
-          "Description": "Точное количество секунд (0–59)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "d73c053997e64a8fb4399f8138aa00aa",
-          "Name": "millisecond",
-          "Description": "Точное количество миллисекунд (0–999)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "c639fcd09cb8434abb59dd2c96d034f8",
-          "Name": "dateTime",
-          "Description": "DateTime",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Создание нового значения DateTime с точной датой и временем.\n\nDateTime.ByDateAndTime (year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0, millisecond: int = 0): var"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "NodeType": "FunctionNode",
-      "FunctionSignature": "DSCore.DateTime.ByDateAndTime@int,int,int,int,int,int,int",
-      "Id": "837d88e80f4840fe95c0fcc21ff188f7",
-      "Inputs": [
-        {
-          "Id": "a22aa604132148699586e9e1ad9fbcf1",
-          "Name": "year",
-          "Description": "Точный год (1–9999)\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "41adb3e88e63441da8083eed87417d7e",
-          "Name": "month",
-          "Description": "Точный месяц (1–12)\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "f05815509d6346c988ab02b8f8691ff9",
-          "Name": "day",
-          "Description": "Точный день (1–[дней в месяце])\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "bec363859eb04b4ba50ee98a124fd056",
-          "Name": "hour",
-          "Description": "Точное количество часов (0–23)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "0752dca9188d4e21b3f428f5f6bdec55",
-          "Name": "minute",
-          "Description": "Точное количество минут (0–59)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "b336668bcd104e7e8884a7cccc50bbb6",
-          "Name": "second",
-          "Description": "Точное количество секунд (0–59)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "d63f37622f6c46d4af8429aea2bf0dc3",
-          "Name": "millisecond",
-          "Description": "Точное количество миллисекунд (0–999)\n\nint\nЗначение по умолчанию : 0",
-          "UsingDefaultValue": true,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "7783ea9b872c4ef987833f3f1cdd4a66",
-          "Name": "dateTime",
-          "Description": "DateTime",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Создание нового значения DateTime с точной датой и временем.\n\nDateTime.ByDateAndTime (year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0, millisecond: int = 0): var"
-    },
-    {
-      "ConcreteType": "CoreNodeModels.FromArray, CoreNodeModels",
-      "NodeType": "ExtensionNode",
-      "Id": "5f71b317985641f59ceb87aaafd19519",
-      "Inputs": [
-        {
-          "Id": "901d9cd08a284617a22ce28ce1ddd754",
-          "Name": "arr",
-          "Description": "Массив объекта для индексации",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "8789e4acfc914300aa383f0755fe6cb0",
-          "Name": "str",
-          "Description": "Строчное представление массива",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Преобразование массива в строчное представление."
-    },
-    {
-      "ConcreteType": "CoreNodeModels.FromArray, CoreNodeModels",
-      "NodeType": "ExtensionNode",
-      "Id": "ff812a4fad404c1382e95dfe623b3133",
-      "Inputs": [
-        {
-          "Id": "bd6df9df8b2f416fb6ad6c13fb6569fa",
-          "Name": "arr",
-          "Description": "Массив объекта для индексации",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "829c467d11844c2084832f287bafb6e4",
-          "Name": "str",
-          "Description": "Строчное представление массива",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Преобразование массива в строчное представление."
-    },
-    {
-      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "NodeType": "PythonScriptNode",
-      "Code": "# Загрузить стандартную библиотеку Python и библиотеку DesignScript\r\nimport sys\r\nimport clr\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nlat=IN[0]\r\nNS=IN[1]\r\nTrueLat=()\r\n\r\nNS=NS.upper()\r\nif NS == \"N\":\r\n\tTrueLat=lat\r\nif NS ==\"S\":\r\n\tTrueLat=lat*-1\r\n\r\n# Назначьте вывод переменной OUT.\r\nOUT = TrueLat",
-      "VariableInputPorts": true,
-      "Id": "e33868ffd6e7445aa8419cbe68b1983b",
-      "Inputs": [
-        {
-          "Id": "a084103b3ec34f089077ef60e4b1d142",
-          "Name": "IN[0]",
-          "Description": "Input #0",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "b3e078f62e4b443db5656b89a3a6a3aa",
-          "Name": "IN[1]",
-          "Description": "Input #1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "ceeaa329eaeb459badd24e02881827ee",
-          "Name": "OUT",
-          "Description": "Результат сценария Python",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Выполнение встроенного сценария IronPython."
-    },
-    {
-      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
-      "NodeType": "PythonScriptNode",
-      "Code": "# Загрузить стандартную библиотеку Python и библиотеку DesignScript\r\nimport sys\r\nimport clr\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nlat=IN[0]\r\nWE=IN[1]\r\nTrueLat=()\r\nexeption=()\r\n\r\nWE=WE.upper()\r\nif WE == \"W\":\r\n\tTrueLat=lat\r\nif WE ==\"E\":\r\n\tTrueLat=lat*-1\r\n\r\n# Назначьте вывод переменной OUT.\r\nOUT = TrueLat",
-      "VariableInputPorts": true,
-      "Id": "6493b2a3314445fe84168a76f50b2c60",
-      "Inputs": [
-        {
-          "Id": "3f78f224406940799a4fc2c25463ab5c",
-          "Name": "IN[0]",
-          "Description": "Input #0",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "836eca00ac8f49478ac41849bb5c5eed",
-          "Name": "IN[1]",
-          "Description": "Input #1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "e256993939c545a3a0369bce76bfc0d2",
-          "Name": "OUT",
-          "Description": "Результат сценария Python",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Выполнение встроенного сценария IronPython."
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "NodeType": "FunctionNode",
-      "FunctionSignature": "DSCore.List.GetItemAtIndex@var[]..[],int",
-      "Id": "9eac8e7ca0cb4bc1b28e7af4a4f954a8",
-      "Inputs": [
-        {
-          "Id": "fdc91072aac24952a6fa5472cdcadf5d",
-          "Name": "list",
-          "Description": "Список, из которого требуется извлечь элемент.\n\nvar[]..[]",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": true,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "77303fe9041c4128984072d398d13f14",
-          "Name": "index",
-          "Description": "Индекс элемента для включения в выборку.\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "e196128099b643aeb905056e8deda5ea",
-          "Name": "item",
-          "Description": "Элемент в списке по заданному индексу.",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Получение элемента из данного списка, расположенного по указанному индексу.\n\nList.GetItemAtIndex (list: var[]..[], index: int): var[]..[]"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
-      "NodeType": "CodeBlockNode",
-      "Code": "1;",
-      "Id": "9420b1a8b65d4ab6b8db367a246a193d",
-      "Inputs": [],
-      "Outputs": [
-        {
-          "Id": "9d2dfa9bb5d54874ab606af356285d40",
-          "Name": "",
-          "Description": "Значение выражения в строке 1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Обеспечивает возможность непосредственного авторства кода DesignScript"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "NodeType": "FunctionNode",
-      "FunctionSignature": "DSCore.List.GetItemAtIndex@var[]..[],int",
-      "Id": "070a27b3277b4c19b0906a8dd9ff7012",
-      "Inputs": [
-        {
-          "Id": "f8b955ed04204a2b948316a30c21e605",
-          "Name": "list",
-          "Description": "Список, из которого требуется извлечь элемент.\n\nvar[]..[]",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": true,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "ef3cda75fb794c19bc02763579b74014",
-          "Name": "index",
-          "Description": "Индекс элемента для включения в выборку.\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "07921a6d738549e7abae90f88678a83c",
-          "Name": "item",
-          "Description": "Элемент в списке по заданному индексу.",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Получение элемента из данного списка, расположенного по указанному индексу.\n\nList.GetItemAtIndex (list: var[]..[], index: int): var[]..[]"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
-      "NodeType": "CodeBlockNode",
-      "Code": "2;",
-      "Id": "01c610b2b16f4f0f99dfdb1999d331d3",
-      "Inputs": [],
-      "Outputs": [
-        {
-          "Id": "1a5670009a21498d93772235012331f1",
-          "Name": "",
-          "Description": "Значение выражения в строке 1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Обеспечивает возможность непосредственного авторства кода DesignScript"
     },
     {
       "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
@@ -1775,7 +1196,7 @@
     },
     {
       "ConcreteType": "DSRevitNodesUI.Views, DSRevitNodesUI",
-      "SelectedIndex": 63,
+      "SelectedIndex": 64,
       "SelectedString": "АНАЛИЗ_Исноляция_3D",
       "NodeType": "ExtensionNode",
       "Id": "ee8cb5b6e9914e7c8298dbdc9204c8ca",
@@ -2186,65 +1607,6 @@
       ],
       "Replication": "Auto",
       "Description": "Фильтрация последовательности путем поиска соответствующих индексов в отдельном списке логических операций.\n\nList.FilterByBoolMask (list: var[]..[], mask: var[]..[]): var[]..[]"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.ZeroTouch.DSFunction, DynamoCore",
-      "NodeType": "FunctionNode",
-      "FunctionSignature": "DSCore.List.GetItemAtIndex@var[]..[],int",
-      "Id": "c080108033574e7c81c0fb9f4dbfd654",
-      "Inputs": [
-        {
-          "Id": "d49f9f97ad6b47d7813c737e8940ba0f",
-          "Name": "list",
-          "Description": "Список, из которого требуется извлечь элемент.\n\nvar[]..[]",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": true,
-          "KeepListStructure": false
-        },
-        {
-          "Id": "cdedb13fa1ae4a27a500ef59e2a51e6e",
-          "Name": "index",
-          "Description": "Индекс элемента для включения в выборку.\n\nint",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Outputs": [
-        {
-          "Id": "65ae6779bf8346bfaf0f37878c4f335a",
-          "Name": "item",
-          "Description": "Элемент в списке по заданному индексу.",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Auto",
-      "Description": "Получение элемента из данного списка, расположенного по указанному индексу.\n\nList.GetItemAtIndex (list: var[]..[], index: int): var[]..[]"
-    },
-    {
-      "ConcreteType": "Dynamo.Graph.Nodes.CodeBlockNodeModel, DynamoCore",
-      "NodeType": "CodeBlockNode",
-      "Code": "0;",
-      "Id": "d7b27c34e9ad4f77a50304f7165eef22",
-      "Inputs": [],
-      "Outputs": [
-        {
-          "Id": "c46b375139cb40ad84d1ebea86a06c34",
-          "Name": "",
-          "Description": "Значение выражения в строке 1",
-          "UsingDefaultValue": false,
-          "Level": 2,
-          "UseLevels": false,
-          "KeepListStructure": false
-        }
-      ],
-      "Replication": "Disabled",
-      "Description": "Обеспечивает возможность непосредственного авторства кода DesignScript"
     },
     {
       "ConcreteType": "CoreNodeModels.FromObject, CoreNodeModels",
@@ -3152,83 +2514,207 @@
       ],
       "Replication": "Disabled",
       "Description": "Обеспечивает возможность непосредственного авторства кода DesignScript"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Function, DynamoCore",
+      "FunctionSignature": "9d8d1cc8-743d-405c-b727-e315b7182960",
+      "FunctionType": "Graph",
+      "NodeType": "FunctionNode",
+      "Id": "d164c67f723e4521974ceb2f0a550b87",
+      "Inputs": [
+        {
+          "Id": "e84e09060b564eaab1ecc91ecec211f9",
+          "Name": "Year",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "d108319d3eaf4d88b15ce8ba8f79e27b",
+          "Name": "Month",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "0e53949527d14e6cbfeeb9270944f417",
+          "Name": "Day",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "db4b4c0955c44019bf54326a98ab3abd",
+          "Name": "Start_Hour",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "73e780bf3c0747a5a35dc8ccc0416764",
+          "Name": "Start_Minute",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "c8af6d3ae7ff4ae8a0b1d928f3692a7f",
+          "Name": "End_Hour",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "63124c2121704b86901bcf9fd4189f27",
+          "Name": "End_Minute",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "00de8f4d7a7146d1b73b047fd237825c",
+          "Name": "UTC",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "7bfe1f6d0b3c4c4d8c8604e8f94fe931",
+          "Name": "TimeStep",
+          "Description": "double",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4a4d2471b165481f8df6a8b37de52329",
+          "Name": "North_South",
+          "Description": "string",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "1a8673b0d60144ae9e7cdbc4538db114",
+          "Name": "East_West",
+          "Description": "string",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "689ea2f1936c4d088e776dd3d7162af9",
+          "Name": "Azimuts",
+          "Description": "возвращаемое значение",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "2501bf2e36f148338682964b03243809",
+          "Name": "Altitudes",
+          "Description": "возвращаемое значение",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "20d958e0ee7f4de991eb52a8b49eea6a",
+          "Name": "Time",
+          "Description": "возвращаемое значение",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Auto",
+      "Description": "Calculates sun posion for time perod on chosen date. Uses NOAA SPA method with  error ≈ 1°.\r\nNorth_South: use \"n-north, s-south\"\r\nEast_West: use\"w-west, e-east\""
     }
   ],
   "Connectors": [
     {
       "Start": "73996062317b4e51b68c20b09319735e",
-      "End": "b3e078f62e4b443db5656b89a3a6a3aa",
-      "Id": "a3c661184e8047beaca5989937bfd9d4"
+      "End": "4a4d2471b165481f8df6a8b37de52329",
+      "Id": "be18fe0868bd43c38df064f9f43e6648"
     },
     {
       "Start": "9b13dd6cb7ed4df983f4dbdef64f336c",
-      "End": "836eca00ac8f49478ac41849bb5c5eed",
-      "Id": "92c096951b59423c956d7483c5cacab6"
+      "End": "1a8673b0d60144ae9e7cdbc4538db114",
+      "Id": "294156700114489b932c3a81793958ba"
     },
     {
       "Start": "5e2f8c2a52954a57a0133510e871c478",
-      "End": "cf9a2a8427ce428db3993c0338891f6b",
-      "Id": "85adec588c0d457a8b7381f6fed7462a"
+      "End": "00de8f4d7a7146d1b73b047fd237825c",
+      "Id": "5fbd09124e41415f838fb6d7bfac2092"
     },
     {
       "Start": "832af85c2ea64ca0aba0e985d20b2e46",
-      "End": "a22aa604132148699586e9e1ad9fbcf1",
-      "Id": "e289e2281655438daf0f1ca32fa70e57"
-    },
-    {
-      "Start": "832af85c2ea64ca0aba0e985d20b2e46",
-      "End": "9a3df689372944eeaa74c0935a97ae75",
-      "Id": "23fc745a5adf4d46a7d74988bc21cb21"
+      "End": "e84e09060b564eaab1ecc91ecec211f9",
+      "Id": "971077f73fa2485a83bc9aeaf7e6ee0d"
     },
     {
       "Start": "6e8ccb8d9c2d4dcf9492c71ef67facba",
-      "End": "7d2959d45e7c46c8a9136c3563e7e071",
-      "Id": "06d77117df924e6a8dc2f3be2cbca740"
-    },
-    {
-      "Start": "6e8ccb8d9c2d4dcf9492c71ef67facba",
-      "End": "41adb3e88e63441da8083eed87417d7e",
-      "Id": "b93b15f910dd42e398e3bc8fbdb5692e"
+      "End": "d108319d3eaf4d88b15ce8ba8f79e27b",
+      "Id": "11d8568d6f8b4eecaa918c4cdab5188c"
     },
     {
       "Start": "650090f4fa724c488fc3c805cf9344d1",
-      "End": "e2ca088925b848928c29cdd21324c514",
-      "Id": "2db0688d2c8a4b6688252f1dbf420061"
-    },
-    {
-      "Start": "650090f4fa724c488fc3c805cf9344d1",
-      "End": "f05815509d6346c988ab02b8f8691ff9",
-      "Id": "ce2e1bb85a5c4347a560640dc0a557dd"
+      "End": "0e53949527d14e6cbfeeb9270944f417",
+      "Id": "591fd1e66d214690987ec1c63625dc8b"
     },
     {
       "Start": "7600925c22e54c60948acdf71fff3a6b",
-      "End": "79629d47c8674834bf83229c7e00b485",
-      "Id": "413fa7c30a39446b97c2249f90134a49"
+      "End": "db4b4c0955c44019bf54326a98ab3abd",
+      "Id": "8a6fc37090294778b1b8fb14a436cd42"
     },
     {
       "Start": "4504b8f76ace471c83be56c75ae88dfd",
-      "End": "b927d6220d714c25aa2dc2a92c965c79",
-      "Id": "ed1f8aded43c4d63bd17938d81e0c38b"
+      "End": "73e780bf3c0747a5a35dc8ccc0416764",
+      "Id": "77324fabbab84c5380e49102f66cb881"
     },
     {
       "Start": "73ffbabeec6e49988aeece5f1fcadb85",
-      "End": "bec363859eb04b4ba50ee98a124fd056",
-      "Id": "f031a5a0b5e645b998a45f477b87d473"
+      "End": "c8af6d3ae7ff4ae8a0b1d928f3692a7f",
+      "Id": "e2987c9db02c4dfc97b3031c8f91fa4c"
     },
     {
       "Start": "dc3d13413eb04a49976cfe3900ca0bef",
-      "End": "0752dca9188d4e21b3f428f5f6bdec55",
-      "Id": "9ed6bb7a4b0d4f5d8beee3142280853e"
-    },
-    {
-      "Start": "04c4c03d3fc5420fba624ad1b8221553",
-      "End": "e7b8c2b8230844bf8006068fb7fae232",
-      "Id": "ebc1a0b6c3ba4141956cde36822fb7c4"
+      "End": "63124c2121704b86901bcf9fd4189f27",
+      "Id": "5ceabc6eaa41450ebe55f83156eb9dc2"
     },
     {
       "Start": "04c4c03d3fc5420fba624ad1b8221553",
       "End": "ebbf4420253c4e228dc3b2da52216cb7",
       "Id": "8b2a54395497423ba4a4269a00b4fcc5"
+    },
+    {
+      "Start": "04c4c03d3fc5420fba624ad1b8221553",
+      "End": "7bfe1f6d0b3c4c4d8c8604e8f94fe931",
+      "Id": "9f620ca0ef8c4800b5a2a6b62dd20c57"
     },
     {
       "Start": "64b1a944f2d7416196010cb799a10367",
@@ -3371,94 +2857,9 @@
       "Id": "536bb94b099e4a1ca99e0ce0f43f09de"
     },
     {
-      "Start": "a9ce85afa86f4a9a8dd75367d4e6face",
-      "End": "fdc91072aac24952a6fa5472cdcadf5d",
-      "Id": "d991de54bada473e8784bebeab08e80f"
-    },
-    {
-      "Start": "a9ce85afa86f4a9a8dd75367d4e6face",
-      "End": "f8b955ed04204a2b948316a30c21e605",
-      "Id": "d710a384285d450eb0ebac5e321b01ab"
-    },
-    {
-      "Start": "a9ce85afa86f4a9a8dd75367d4e6face",
-      "End": "d49f9f97ad6b47d7813c737e8940ba0f",
-      "Id": "6546d2f9f2e942c48fc753fd9775bb48"
-    },
-    {
       "Start": "d06c4bf093ef46d38bc5b63659835722",
       "End": "a6e5a2d504f04da4a84c4fd71cb340a2",
       "Id": "8cda3b06245647939404f3455d1d112c"
-    },
-    {
-      "Start": "639a98cad50044698ecda2dc8e6267dd",
-      "End": "bda8d804ba834c9994f0aa114a7b8626",
-      "Id": "95007284f1fe439a8d9c98ee7a5fed54"
-    },
-    {
-      "Start": "639a98cad50044698ecda2dc8e6267dd",
-      "End": "cdba93a3514940e180aacf56d5c8123a",
-      "Id": "f88aa9704d144905a00414ffc2723245"
-    },
-    {
-      "Start": "dedba0a8b8e34a588b1efd15547b03d0",
-      "End": "a084103b3ec34f089077ef60e4b1d142",
-      "Id": "522caa85f92a404ab92ead0659be23ce"
-    },
-    {
-      "Start": "4455b88adf05465ba2e65702f612d7b2",
-      "End": "3f78f224406940799a4fc2c25463ab5c",
-      "Id": "48a4f0fd16e74782b2addd7833349d2c"
-    },
-    {
-      "Start": "c639fcd09cb8434abb59dd2c96d034f8",
-      "End": "901d9cd08a284617a22ce28ce1ddd754",
-      "Id": "86ff2db581c94db3a3f310961b7a8663"
-    },
-    {
-      "Start": "7783ea9b872c4ef987833f3f1cdd4a66",
-      "End": "bd6df9df8b2f416fb6ad6c13fb6569fa",
-      "Id": "c88fb83d491843e3b0800f874365e970"
-    },
-    {
-      "Start": "8789e4acfc914300aa383f0755fe6cb0",
-      "End": "62ba0d6b9faf4659a3fb1b9869ef6830",
-      "Id": "68592790e28f44f68495abf193fc463a"
-    },
-    {
-      "Start": "829c467d11844c2084832f287bafb6e4",
-      "End": "9a2591444b8b4374aa66dc6e413cea8c",
-      "Id": "0efe9629206c4bfcbdad8eb4d2549ad4"
-    },
-    {
-      "Start": "ceeaa329eaeb459badd24e02881827ee",
-      "End": "ce76098757674c5dbd9f64fc95841f01",
-      "Id": "56fcac37d39546b0942352a0bc4ad792"
-    },
-    {
-      "Start": "e256993939c545a3a0369bce76bfc0d2",
-      "End": "a6f86a51a85840ed9a838412a4da8d74",
-      "Id": "b434c9081cf940409d7fb684810038e6"
-    },
-    {
-      "Start": "e196128099b643aeb905056e8deda5ea",
-      "End": "d59f924ca7344406922b2aa96c806c02",
-      "Id": "0427e8aee19346408774eb35cfff4580"
-    },
-    {
-      "Start": "9d2dfa9bb5d54874ab606af356285d40",
-      "End": "77303fe9041c4128984072d398d13f14",
-      "Id": "d3a22e4562ff4f7eab61d5c91bb3fa0b"
-    },
-    {
-      "Start": "07921a6d738549e7abae90f88678a83c",
-      "End": "9253cafe01204aa4b76831e0043f9357",
-      "Id": "8c17b0fc772b40a798f92f8a078b68de"
-    },
-    {
-      "Start": "1a5670009a21498d93772235012331f1",
-      "End": "ef3cda75fb794c19bc02763579b74014",
-      "Id": "f88f6df04cfe47afb836b35ebabddb2d"
     },
     {
       "Start": "38b57a7e63304ac591e8d3798e7fda08",
@@ -3534,16 +2935,6 @@
       "Start": "e1cbb446703c4033b8613c6f5610c85b",
       "End": "1890177d0e6e4a8a99f2f7e2f0612529",
       "Id": "8bf15d99ca37487da06d1e53da2149d3"
-    },
-    {
-      "Start": "65ae6779bf8346bfaf0f37878c4f335a",
-      "End": "30e06268df494bfdb65191951d133d88",
-      "Id": "008c68d06ad142449c4d51f3983e4c70"
-    },
-    {
-      "Start": "c46b375139cb40ad84d1ebea86a06c34",
-      "End": "cdedb13fa1ae4a27a500ef59e2a51e6e",
-      "Id": "2a81de9e3f9246909ef5e0748d392924"
     },
     {
       "Start": "c3c7b9ae9c0e491d91bbc8e4242bd74d",
@@ -3699,10 +3090,26 @@
       "Start": "d90b092f565c4a57975021fa0fce0f96",
       "End": "4c7a4fdfab074aadad4e04c3b42c2e77",
       "Id": "04d50191f0d644439b51d4eb46c0c11e"
+    },
+    {
+      "Start": "689ea2f1936c4d088e776dd3d7162af9",
+      "End": "d59f924ca7344406922b2aa96c806c02",
+      "Id": "b449304d24544051897ae9098ec9729e"
+    },
+    {
+      "Start": "2501bf2e36f148338682964b03243809",
+      "End": "9253cafe01204aa4b76831e0043f9357",
+      "Id": "aa4ddfe333684e0bae0555d267b2a2e2"
+    },
+    {
+      "Start": "20d958e0ee7f4de991eb52a8b49eea6a",
+      "End": "30e06268df494bfdb65191951d133d88",
+      "Id": "25ab5a52cf8340e88c08ff0af1c962bd"
     }
   ],
   "Dependencies": [
-    "de53be2a-ccd3-4ba4-ac19-bfc582c19c9b"
+    "de53be2a-ccd3-4ba4-ac19-bfc582c19c9b",
+    "9d8d1cc8-743d-405c-b727-e315b7182960"
   ],
   "NodeLibraryDependencies": [
     {
@@ -3714,7 +3121,14 @@
       ]
     }
   ],
-  "Bindings": [],
+  "Bindings": [
+    {
+      "NodeId": "2bbe883f-7324-4e1f-883f-12427fa516ea",
+      "Binding": {
+        "ByMesh_InClassDecl-1_InFunctionScope-1_Instance1_2bbe883f-7324-4e1f-883f-12427fa516ea": "PFNPQVAtRU5WOkVudmVsb3BlIHhtbG5zOnhzaT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEtaW5zdGFuY2UiIHhtbG5zOnhzZD0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEiIHhtbG5zOlNPQVAtRU5DPSJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy9zb2FwL2VuY29kaW5nLyIgeG1sbnM6U09BUC1FTlY9Imh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3NvYXAvZW52ZWxvcGUvIiB4bWxuczpjbHI9Imh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vc29hcC9lbmNvZGluZy9jbHIvMS4wIiBTT0FQLUVOVjplbmNvZGluZ1N0eWxlPSJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy9zb2FwL2VuY29kaW5nLyI+DQo8U09BUC1FTlY6Qm9keT4NCjxhMTpDYWxsU2l0ZV94MDAyQl9UcmFjZVNlcmlhbGlzZXJIZWxwZXIgaWQ9InJlZi0xIiB4bWxuczphMT0iaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS9jbHIvbnNhc3NlbS9Qcm90b0NvcmUvUHJvdG9Db3JlJTJDJTIwVmVyc2lvbiUzRDIuNi4xLjg3ODYlMkMlMjBDdWx0dXJlJTNEbmV1dHJhbCUyQyUyMFB1YmxpY0tleVRva2VuJTNEbnVsbCI+DQo8TnVtYmVyT2ZFbGVtZW50cz4xPC9OdW1iZXJPZkVsZW1lbnRzPg0KPEJhc2UtMF9IYXNEYXRhPmZhbHNlPC9CYXNlLTBfSGFzRGF0YT4NCjxCYXNlLTBfSGFzTmVzdGVkRGF0YT50cnVlPC9CYXNlLTBfSGFzTmVzdGVkRGF0YT4NCjxCYXNlLTBfTmVzdGVkRGF0YUNvdW50PjI8L0Jhc2UtMF9OZXN0ZWREYXRhQ291bnQ+DQo8QmFzZS0wLTBfSGFzRGF0YT50cnVlPC9CYXNlLTAtMF9IYXNEYXRhPg0KPEJhc2UtMC0wX0RhdGEgaWQ9InJlZi0zIj5QRk5QUVZBdFJVNVdPa1Z1ZG1Wc2IzQmxJSGh0Ykc1ek9uaHphVDBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01TOVlUVXhUWTJobGJXRXRhVzV6ZEdGdVkyVWlJSGh0Ykc1ek9uaHpaRDBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01TOVlUVXhUWTJobGJXRWlJSGh0Ykc1ek9sTlBRVkF0UlU1RFBTSm9kSFJ3T2k4dmMyTm9aVzFoY3k1NGJXeHpiMkZ3TG05eVp5OXpiMkZ3TDJWdVkyOWthVzVuTHlJZ2VHMXNibk02VTA5QlVDMUZUbFk5SW1oMGRIQTZMeTl6WTJobGJXRnpMbmh0YkhOdllYQXViM0puTDNOdllYQXZaVzUyWld4dmNHVXZJaUI0Yld4dWN6cGpiSEk5SW1oMGRIQTZMeTl6WTJobGJXRnpMbTFwWTNKdmMyOW1kQzVqYjIwdmMyOWhjQzlsYm1OdlpHbHVaeTlqYkhJdk1TNHdJaUJUVDBGUUxVVk9WanBsYm1OdlpHbHVaMU4wZVd4bFBTSm9kSFJ3T2k4dmMyTm9aVzFoY3k1NGJXeHpiMkZ3TG05eVp5OXpiMkZ3TDJWdVkyOWthVzVuTHlJK0RRbzhVMDlCVUMxRlRsWTZRbTlrZVQ0TkNqeGhNVHBFYVhKbFkzUlRhR0Z3WlZOMFlYUmxJR2xrUFNKeVpXWXRNU0lnZUcxc2JuTTZZVEU5SW1oMGRIQTZMeTl6WTJobGJXRnpMbTFwWTNKdmMyOW1kQzVqYjIwdlkyeHlMMjV6WVhOelpXMHZVbVYyYVhRdVJXeGxiV1Z1ZEhNdlVtVjJhWFJPYjJSbGN5VXlReVV5TUZabGNuTnBiMjRsTTBReUxqWXVNUzQ0T0RVd0pUSkRKVEl3UTNWc2RIVnlaU1V6Ukc1bGRYUnlZV3dsTWtNbE1qQlFkV0pzYVdOTFpYbFViMnRsYmlVelJHNTFiR3dpUGcwS1BITjBjbWx1WjBsRUlHbGtQU0p5WldZdE15SStORGxqTlRZeU0yWXRaV0UxTlMwME1EWmxMVGt4TldNdE1qTXlZemt5TlRGbE1UUmpMVEF3TVdOa05USTJQQzl6ZEhKcGJtZEpSRDROQ2p4cGJuUkpSRDR4T0RnNU5UYzBQQzlwYm5SSlJENE5Danh6ZVc1alNXUWdhV1E5SW5KbFppMDBJajR4TkdSaVpqazNOaTFrTnpVM0xUUTVOMkl0WWpaaVpTMWxOMkkwWXpGak0yWmxObU04TDNONWJtTkpaRDROQ2p4dFlYUmxjbWxoYkVsa1BqZ3dOVFExTkR3dmJXRjBaWEpwWVd4SlpENE5Dand2WVRFNlJHbHlaV04wVTJoaGNHVlRkR0YwWlQ0TkNqd3ZVMDlCVUMxRlRsWTZRbTlrZVQ0TkNqd3ZVMDlCVUMxRlRsWTZSVzUyWld4dmNHVStEUW89PC9CYXNlLTAtMF9EYXRhPg0KPEJhc2UtMC0wX0hhc05lc3RlZERhdGE+ZmFsc2U8L0Jhc2UtMC0wX0hhc05lc3RlZERhdGE+DQo8QmFzZS0wLTFfSGFzRGF0YT50cnVlPC9CYXNlLTAtMV9IYXNEYXRhPg0KPEJhc2UtMC0xX0RhdGEgaWQ9InJlZi00Ij5QRk5QUVZBdFJVNVdPa1Z1ZG1Wc2IzQmxJSGh0Ykc1ek9uaHphVDBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01TOVlUVXhUWTJobGJXRXRhVzV6ZEdGdVkyVWlJSGh0Ykc1ek9uaHpaRDBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01TOVlUVXhUWTJobGJXRWlJSGh0Ykc1ek9sTlBRVkF0UlU1RFBTSm9kSFJ3T2k4dmMyTm9aVzFoY3k1NGJXeHpiMkZ3TG05eVp5OXpiMkZ3TDJWdVkyOWthVzVuTHlJZ2VHMXNibk02VTA5QlVDMUZUbFk5SW1oMGRIQTZMeTl6WTJobGJXRnpMbmh0YkhOdllYQXViM0puTDNOdllYQXZaVzUyWld4dmNHVXZJaUI0Yld4dWN6cGpiSEk5SW1oMGRIQTZMeTl6WTJobGJXRnpMbTFwWTNKdmMyOW1kQzVqYjIwdmMyOWhjQzlsYm1OdlpHbHVaeTlqYkhJdk1TNHdJaUJUVDBGUUxVVk9WanBsYm1OdlpHbHVaMU4wZVd4bFBTSm9kSFJ3T2k4dmMyTm9aVzFoY3k1NGJXeHpiMkZ3TG05eVp5OXpiMkZ3TDJWdVkyOWthVzVuTHlJK0RRbzhVMDlCVUMxRlRsWTZRbTlrZVQ0TkNqeGhNVHBFYVhKbFkzUlRhR0Z3WlZOMFlYUmxJR2xrUFNKeVpXWXRNU0lnZUcxc2JuTTZZVEU5SW1oMGRIQTZMeTl6WTJobGJXRnpMbTFwWTNKdmMyOW1kQzVqYjIwdlkyeHlMMjV6WVhOelpXMHZVbVYyYVhRdVJXeGxiV1Z1ZEhNdlVtVjJhWFJPYjJSbGN5VXlReVV5TUZabGNuTnBiMjRsTTBReUxqWXVNUzQ0T0RVd0pUSkRKVEl3UTNWc2RIVnlaU1V6Ukc1bGRYUnlZV3dsTWtNbE1qQlFkV0pzYVdOTFpYbFViMnRsYmlVelJHNTFiR3dpUGcwS1BITjBjbWx1WjBsRUlHbGtQU0p5WldZdE15SStORGxqTlRZeU0yWXRaV0UxTlMwME1EWmxMVGt4TldNdE1qTXlZemt5TlRGbE1UUmpMVEF3TVdOa05USTNQQzl6ZEhKcGJtZEpSRDROQ2p4cGJuUkpSRDR4T0RnNU5UYzFQQzlwYm5SSlJENE5Danh6ZVc1alNXUWdhV1E5SW5KbFppMDBJajR3TVRVM1pHWTRaQzFoWmpkaExUUXpPREV0T0RVeE9TMHdORGMxTVRFd05UUTRZVGc4TDNONWJtTkpaRDROQ2p4dFlYUmxjbWxoYkVsa1BqZ3dOVFExTkR3dmJXRjBaWEpwWVd4SlpENE5Dand2WVRFNlJHbHlaV04wVTJoaGNHVlRkR0YwWlQ0TkNqd3ZVMDlCVUMxRlRsWTZRbTlrZVQ0TkNqd3ZVMDlCVUMxRlRsWTZSVzUyWld4dmNHVStEUW89PC9CYXNlLTAtMV9EYXRhPg0KPEJhc2UtMC0xX0hhc05lc3RlZERhdGE+ZmFsc2U8L0Jhc2UtMC0xX0hhc05lc3RlZERhdGE+DQo8L2ExOkNhbGxTaXRlX3gwMDJCX1RyYWNlU2VyaWFsaXNlckhlbHBlcj4NCjwvU09BUC1FTlY6Qm9keT4NCjwvU09BUC1FTlY6RW52ZWxvcGU+DQo="
+      }
+    }
+  ],
   "View": {
     "Dynamo": {
       "ScaleFactor": 10000.0,
@@ -3744,8 +3158,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -2140.6241455799836,
-        "Y": -3852.9469072153342
+        "X": -1930.1620943005298,
+        "Y": -2881.130999826099
       },
       {
         "ShowGeometry": true,
@@ -3754,8 +3168,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -2169.2116285070033,
-        "Y": -3730.0505338954754
+        "X": -1958.7495772275495,
+        "Y": -2758.23462650624
       },
       {
         "ShowGeometry": true,
@@ -3764,8 +3178,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1951.2602806909583,
-        "Y": -3549.0242568077183
+        "X": -1975.966391940934,
+        "Y": -3402.6880594040163
       },
       {
         "ShowGeometry": true,
@@ -3774,8 +3188,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -3298.4398927224165,
-        "Y": -3394.5878914252521
+        "X": -2000.7684456599086,
+        "Y": -4119.1572711381632
       },
       {
         "ShowGeometry": true,
@@ -3784,8 +3198,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -3297.71948959166,
-        "Y": -3322.24647220947
+        "X": -1999.0742153113724,
+        "Y": -4054.5020463698938
       },
       {
         "ShowGeometry": true,
@@ -3794,8 +3208,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -3297.12004074218,
-        "Y": -3249.7363593079426
+        "X": -1998.4747664618926,
+        "Y": -3981.9919334683664
       },
       {
         "ShowGeometry": true,
@@ -3804,8 +3218,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -2794.14449343792,
-        "Y": -3419.71671666561
+        "X": -1959.6820311640731,
+        "Y": -3769.4040391723734
       },
       {
         "ShowGeometry": true,
@@ -3814,8 +3228,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -2795.09802312856,
-        "Y": -3353.38559581718
+        "X": -1960.6355608547128,
+        "Y": -3703.0729183239432
       },
       {
         "ShowGeometry": true,
@@ -3824,8 +3238,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -2794.91678944676,
-        "Y": -3108.97926960377
+        "X": -1963.8549338542789,
+        "Y": -3616.7948027940461
       },
       {
         "ShowGeometry": true,
@@ -3834,8 +3248,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -2794.68985502418,
-        "Y": -3044.4557462204
+        "X": -1963.6279994316988,
+        "Y": -3552.2712794106765
       },
       {
         "ShowGeometry": true,
@@ -3844,8 +3258,8 @@
         "IsSetAsInput": true,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1948.3538059586811,
-        "Y": -3341.9274224021283
+        "X": -1971.5273149790478,
+        "Y": -3230.84107627943
       },
       {
         "ShowGeometry": true,
@@ -3874,8 +3288,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1579.4035687584703,
-        "Y": -4444.3548972539274
+        "X": -1536.8001743987681,
+        "Y": -4398.4743187127087
       },
       {
         "ShowGeometry": true,
@@ -3884,8 +3298,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1577.1339296581621,
-        "Y": -4645.1818606473962
+        "X": -1586.9654822027087,
+        "Y": -4722.1956889130124
       },
       {
         "ShowGeometry": true,
@@ -3894,8 +3308,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1755.5690875809562,
-        "Y": -4330.13093157553
+        "X": -1727.7130220380739,
+        "Y": -4372.734325935231
       },
       {
         "ShowGeometry": true,
@@ -3904,8 +3318,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1755.9078015789937,
-        "Y": -4423.8126149064383
+        "X": -1728.0517360361114,
+        "Y": -4466.41600926614
       },
       {
         "ShowGeometry": true,
@@ -3914,8 +3328,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1878.4405597312723,
-        "Y": -4725.8229694184784
+        "X": -1888.2721122758189,
+        "Y": -4802.8367976840946
       },
       {
         "ShowGeometry": true,
@@ -3924,8 +3338,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1870.5520083211293,
-        "Y": -4635.0260668626188
+        "X": -1880.3835608656759,
+        "Y": -4712.039895128235
       },
       {
         "ShowGeometry": true,
@@ -3934,8 +3348,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": true,
-        "X": -2124.7879513714097,
-        "Y": -4687.969161509789
+        "X": -2134.6195039159566,
+        "Y": -4764.9829897754053
       },
       {
         "ShowGeometry": true,
@@ -3944,8 +3358,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1756.3573906594745,
-        "Y": -4525.3741251410493
+        "X": -1725.224140935077,
+        "Y": -4276.3081273458656
       },
       {
         "ShowGeometry": true,
@@ -3954,8 +3368,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1342.6920269199682,
-        "Y": -4355.9847071795675
+        "X": -1334.6536572200239,
+        "Y": -4308.42426574657
       },
       {
         "ShowGeometry": true,
@@ -3964,8 +3378,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -866.75487475497732,
-        "Y": -4397.4428274126121
+        "X": -858.716505055033,
+        "Y": -4349.8823859796148
       },
       {
         "ShowGeometry": true,
@@ -3974,8 +3388,8 @@
         "IsSetAsInput": false,
         "IsSetAsOutput": false,
         "Excluded": false,
-        "X": -1065.3876897170094,
-        "Y": -4414.3532237560648
+        "X": -1057.3493200170651,
+        "Y": -4366.7927823230675
       },
       {
         "ShowGeometry": true,
@@ -4069,16 +3483,6 @@
       },
       {
         "ShowGeometry": true,
-        "Name": "Python Script",
-        "Id": "82cfe1ce2dc64f5d985b4f8e36ce8cab",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1523.6826518134192,
-        "Y": -3567.5029166662448
-      },
-      {
-        "ShowGeometry": true,
         "Name": "Element.GetLocation",
         "Id": "a196b00ee9404b2893ab88a048024d0e",
         "IsSetAsInput": false,
@@ -4086,136 +3490,6 @@
         "Excluded": false,
         "X": 554.00665220633186,
         "Y": -5345.220140123025
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "SiteLocation",
-        "Id": "ce102dda1f124bd98c64d4d13f23031a",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -2646.9396004942837,
-        "Y": -3830.4993646980142
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "Location.Latitude",
-        "Id": "10e0ac715a79499d91756688806fc4ea",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -2493.4833530947221,
-        "Y": -3883.1229867614634
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "Location.Longitude",
-        "Id": "e54cdb8b42c94b5884aeb3a38980a022",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -2493.4914316790364,
-        "Y": -3758.0327470503248
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "DateTime.ByDateAndTime",
-        "Id": "2f008d82f9834873b7e89cae63ad19f1",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -2448.79954478985,
-        "Y": -3534.08058112862
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "DateTime.ByDateAndTime",
-        "Id": "837d88e80f4840fe95c0fcc21ff188f7",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -2450.4897166625,
-        "Y": -3223.8157731274
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "String from Array",
-        "Id": "5f71b317985641f59ceb87aaafd19519",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -2113.98725181035,
-        "Y": -3524.90533788273
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "String from Array",
-        "Id": "ff812a4fad404c1382e95dfe623b3133",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -2114.19492529845,
-        "Y": -3439.84298405789
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "Python Script",
-        "Id": "e33868ffd6e7445aa8419cbe68b1983b",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1845.612048396355,
-        "Y": -3901.2925872951218
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "Python Script",
-        "Id": "6493b2a3314445fe84168a76f50b2c60",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1849.2772741999358,
-        "Y": -3782.1496478684671
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "List.GetItemAtIndex",
-        "Id": "9eac8e7ca0cb4bc1b28e7af4a4f954a8",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1181.5009215652392,
-        "Y": -3776.3298431663197
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "Code Block",
-        "Id": "9420b1a8b65d4ab6b8db367a246a193d",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1302.2219198911971,
-        "Y": -3686.6243862528772
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "List.GetItemAtIndex",
-        "Id": "070a27b3277b4c19b0906a8dd9ff7012",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1180.8963330115557,
-        "Y": -3512.9958250998916
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "Code Block",
-        "Id": "01c610b2b16f4f0f99dfdb1999d331d3",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1297.2224434996224,
-        "Y": -3462.9690610106136
       },
       {
         "ShowGeometry": true,
@@ -4356,26 +3630,6 @@
         "Excluded": false,
         "X": 1622.0421226919243,
         "Y": -4519.3433889406379
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "List.GetItemAtIndex",
-        "Id": "c080108033574e7c81c0fb9f4dbfd654",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1176.5088049436367,
-        "Y": -3293.3265310258794
-      },
-      {
-        "ShowGeometry": true,
-        "Name": "Code Block",
-        "Id": "d7b27c34e9ad4f77a50304f7165eef22",
-        "IsSetAsInput": false,
-        "IsSetAsOutput": false,
-        "Excluded": false,
-        "X": -1297.2298032695946,
-        "Y": -3203.6210741124391
       },
       {
         "ShowGeometry": true,
@@ -4656,6 +3910,16 @@
         "Excluded": false,
         "X": 5268.0280796142733,
         "Y": -4517.7244581515306
+      },
+      {
+        "ShowGeometry": true,
+        "Name": "CalculateSunPosition",
+        "Id": "d164c67f723e4521974ceb2f0a550b87",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": -1314.2247385323124,
+        "Y": -3720.2218938580313
       }
     ],
     "Annotations": [
@@ -4663,21 +3927,17 @@
         "Id": "b73ce5bf9cc642948c6316ac5ae4b278",
         "Title": "ProjectNorth VECTOR\r\nZ = 0\r\nX--NORTH\r\nY--WEST/EAST",
         "Nodes": [
-          "e1154da8522049918343157bab819461",
           "a02da33ebcf74f53bfb9a613d2038a9a",
-          "7f068ec0944a4d939e728448ed40b68b",
-          "0ed3a45fb37644778192aa219ea4f060",
           "681d0e163f124fc08277b7d58c94d6dc",
           "afcf321e97104413869daab12a631f67",
-          "a273f0cc1f6e415d8e9eb79906d9942e",
-          "00480a3ef74541a2888902b0641e5694"
+          "a273f0cc1f6e415d8e9eb79906d9942e"
         ],
-        "Left": -2134.7879513714097,
-        "Top": -4965.8229694184784,
-        "Width": 724.65402171324763,
-        "Height": 728.69203784294859,
+        "Left": -2144.6195039159566,
+        "Top": -5042.8367976840946,
+        "Width": 724.65402171324786,
+        "Height": 465.64110877108214,
         "FontSize": 48.0,
-        "InitialTop": -4725.8229694184784,
+        "InitialTop": -4802.8367976840946,
         "InitialHeight": 540.69203784294859,
         "TextblockHeight": 230.0,
         "Background": "#FFC1D676"
@@ -4688,14 +3948,18 @@
         "Nodes": [
           "588af8ba29e24203bb5e420498bb95fa",
           "c3a9bd8888ff4f1698d2ecf441171326",
-          "bad27961f7404089a02ecff1568f4f7e"
+          "bad27961f7404089a02ecff1568f4f7e",
+          "e1154da8522049918343157bab819461",
+          "7f068ec0944a4d939e728448ed40b68b",
+          "0ed3a45fb37644778192aa219ea4f060",
+          "00480a3ef74541a2888902b0641e5694"
         ],
-        "Left": -1352.6920269199682,
-        "Top": -4467.3532237560648,
-        "Width": 697.93715216499083,
-        "Height": 204.36851657649731,
+        "Left": -1738.0517360361114,
+        "Top": -4519.41600926614,
+        "Width": 1091.3352309810784,
+        "Height": 336.10788192027394,
         "FontSize": 36.0,
-        "InitialTop": -4414.3532237560648,
+        "InitialTop": -4466.41600926614,
         "InitialHeight": 203.36851657649731,
         "TextblockHeight": 43.0,
         "Background": "#FFC1D676"
@@ -4774,7 +4038,7 @@
         "Height": 425.34179311504977,
         "FontSize": 36.0,
         "InitialTop": -5356.6418359286508,
-        "InitialHeight": 243.82579222714048,
+        "InitialHeight": 424.34179311504977,
         "TextblockHeight": 43.0,
         "Background": "#FFFFB8D8"
       },
@@ -4803,38 +4067,17 @@
           "5bc7437727294dc28f2336d593d7d3c4",
           "5fbb8188c2884ab7a55b20cf44fdc795",
           "24dd40d280e4460a8e2a0ef47b1f6a84",
-          "2f008d82f9834873b7e89cae63ad19f1",
-          "837d88e80f4840fe95c0fcc21ff188f7",
           "ba52bcaf3d2343a095ae9606c8f4d524",
           "8e2721e4d805468482847d83066e6c87",
-          "5f71b317985641f59ceb87aaafd19519",
-          "ff812a4fad404c1382e95dfe623b3133"
+          "af9424adf7a544c2b2c1082333a8db9d"
         ],
-        "Left": -3307.71948959166,
-        "Top": -3587.08058112862,
-        "Width": 1328.7322377813102,
-        "Height": 610.62483490821978,
+        "Left": -2010.7684456599086,
+        "Top": -4172.1572711381632,
+        "Width": 360.08641449583547,
+        "Height": 687.88599172748673,
         "FontSize": 36.0,
-        "InitialTop": -3534.08058112862,
+        "InitialTop": -4119.1572711381632,
         "InitialHeight": 634.62483490821978,
-        "TextblockHeight": 43.0,
-        "Background": "#FFC1D676"
-      },
-      {
-        "Id": "4441048895824434aba56cb717a7e354",
-        "Title": "Get Project Coordinates",
-        "Nodes": [
-          "ce102dda1f124bd98c64d4d13f23031a",
-          "10e0ac715a79499d91756688806fc4ea",
-          "e54cdb8b42c94b5884aeb3a38980a022"
-        ],
-        "Left": -2656.9396004942837,
-        "Top": -3936.1229867614634,
-        "Width": 382.45624739956156,
-        "Height": 271.09023971113857,
-        "FontSize": 36.0,
-        "InitialTop": -3883.1229867614634,
-        "InitialHeight": 270.09023971113857,
         "TextblockHeight": 43.0,
         "Background": "#FFC1D676"
       },
@@ -4842,17 +4085,15 @@
         "Id": "a6b98e59c8d240e7952bac3b4f08bd86",
         "Title": "Set +-:\r\nNorth +\r\nSouth -\r\nEast +\r\nWest-",
         "Nodes": [
-          "e33868ffd6e7445aa8419cbe68b1983b",
           "f67e5eccbd734199bd145438e57d2b48",
-          "6493b2a3314445fe84168a76f50b2c60",
           "bb180ac070ac45d497550649265359f8"
         ],
-        "Left": -2179.2116285070033,
-        "Top": -4127.2925872951218,
-        "Width": 467.59958011064828,
-        "Height": 465.24205339964647,
+        "Left": -1968.7495772275495,
+        "Top": -3107.130999826099,
+        "Width": 324.58748292701966,
+        "Height": 416.89637331985887,
         "FontSize": 36.0,
-        "InitialTop": -3901.2925872951218,
+        "InitialTop": -2881.130999826099,
         "InitialHeight": 316.24205339964647,
         "TextblockHeight": 216.0,
         "Background": "#FFC1D676"
@@ -4863,63 +4104,13 @@
         "Nodes": [
           "d69f5bec721547818f58cc8e2d3f617e"
         ],
-        "Left": -1961.2602806909583,
-        "Top": -3602.0242568077183,
+        "Left": -1985.966391940934,
+        "Top": -3455.6880594040163,
         "Width": 319.0,
         "Height": 121.0,
         "FontSize": 36.0,
-        "InitialTop": -3549.0242568077183,
+        "InitialTop": -3402.6880594040163,
         "InitialHeight": 145.0,
-        "TextblockHeight": 43.0,
-        "Background": "#FFC1D676"
-      },
-      {
-        "Id": "0f70d8020c914b3080744fa09f572700",
-        "Title": "Resault:     \r\n0 - Time\r\n1 -Azimuth\r\n2 - Altitude",
-        "Nodes": [
-          "82cfe1ce2dc64f5d985b4f8e36ce8cab"
-        ],
-        "Left": -1533.6826518134192,
-        "Top": -3836.5029166662448,
-        "Width": 156.56666666666666,
-        "Height": 492.0,
-        "FontSize": 36.0,
-        "InitialTop": -3567.5029166662448,
-        "InitialHeight": 145.0,
-        "TextblockHeight": 259.0,
-        "Background": "#FFC1D676"
-      },
-      {
-        "Id": "4ce7e4a1d39e4f2fb31426777f4e110e",
-        "Title": "Get Azimuths",
-        "Nodes": [
-          "9eac8e7ca0cb4bc1b28e7af4a4f954a8",
-          "9420b1a8b65d4ab6b8db367a246a193d"
-        ],
-        "Left": -1312.2219198911971,
-        "Top": -3829.3298431663197,
-        "Width": 319.72099832595791,
-        "Height": 235.7054569134425,
-        "FontSize": 36.0,
-        "InitialTop": -3776.3298431663197,
-        "InitialHeight": 234.7054569134425,
-        "TextblockHeight": 43.0,
-        "Background": "#FFC1D676"
-      },
-      {
-        "Id": "be86f52a84a642cf9fcfaba6fb537ca4",
-        "Title": "Get Altitudes",
-        "Nodes": [
-          "070a27b3277b4c19b0906a8dd9ff7012",
-          "01c610b2b16f4f0f99dfdb1999d331d3"
-        ],
-        "Left": -1307.2224434996224,
-        "Top": -3565.9958250998916,
-        "Width": 315.32611048806666,
-        "Height": 196.026764089278,
-        "FontSize": 36.0,
-        "InitialTop": -3512.9958250998916,
-        "InitialHeight": 195.026764089278,
         "TextblockHeight": 43.0,
         "Background": "#FFC1D676"
       },
@@ -4984,32 +4175,15 @@
         "Nodes": [
           "9a4166dab3dc4735801cb7e9b7d24717"
         ],
-        "Left": -1958.3538059586811,
-        "Top": -3437.9274224021283,
+        "Left": -1981.5273149790478,
+        "Top": -3326.84107627943,
         "Width": 319.0,
         "Height": 164.0,
         "FontSize": 36.0,
-        "InitialTop": -3341.9274224021283,
+        "InitialTop": -3230.84107627943,
         "InitialHeight": 145.0,
         "TextblockHeight": 86.0,
         "Background": "#FFFF7BAC"
-      },
-      {
-        "Id": "5d8e809a40ee4a6f89e628676ec65d73",
-        "Title": "Get Time",
-        "Nodes": [
-          "c080108033574e7c81c0fb9f4dbfd654",
-          "d7b27c34e9ad4f77a50304f7165eef22"
-        ],
-        "Left": -1307.2298032695946,
-        "Top": -3346.3265310258794,
-        "Width": 319.72099832595791,
-        "Height": 235.70545691344023,
-        "FontSize": 36.0,
-        "InitialTop": -3293.3265310258794,
-        "InitialHeight": 234.70545691344023,
-        "TextblockHeight": 43.0,
-        "Background": "#FFC1D676"
       },
       {
         "Id": "c6b7be9d19614866aabd1f243c0e3413",
@@ -5089,13 +4263,41 @@
         "Height": 626.42718964825417,
         "FontSize": 36.0,
         "InitialTop": -4998.1516477997848,
-        "InitialHeight": 513.24091699285418,
+        "InitialHeight": 625.42718964825417,
         "TextblockHeight": 43.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "889eea223f2c4606837139048724178c",
+        "Title": "Script Name: FILIN_РасчетИнсоляции_АдаптивноеСемействоОкна_3dлучи.dyn\n\nPackages used in this script: \nList Contains version: 0.1.0\nremove duplicates version: 0.0.1\nType Name version: 0.1.0\nData-Shapes version: 2021.2.94\n\nTimeStamp : 2026/3/3 17:23",
+        "Nodes": [],
+        "Left": -1332.9698355100486,
+        "Top": -3334.0657866076644,
+        "Width": 0.0,
+        "Height": 0.0,
+        "FontSize": 36.0,
+        "InitialTop": 0.0,
+        "InitialHeight": 0.0,
+        "TextblockHeight": 0.0,
+        "Background": "#FFC1D676"
+      },
+      {
+        "Id": "b8df14f88886467d959c82fb1841512c",
+        "Title": "Script Name: FILIN_РасчетИнсоляции_АдаптивноеСемействоОкна_3dлучи.dyn\n\nPackages used in this script: \nList Contains version: 0.1.0\nremove duplicates version: 0.0.1\nType Name version: 0.1.0\nData-Shapes version: 2021.2.94\n\nTimeStamp : 2026/3/3 17:30",
+        "Nodes": [],
+        "Left": -3398.4398927224165,
+        "Top": -5456.6418359286508,
+        "Width": 0.0,
+        "Height": 0.0,
+        "FontSize": 36.0,
+        "InitialTop": 0.0,
+        "InitialHeight": 0.0,
+        "TextblockHeight": 0.0,
         "Background": "#FFC1D676"
       }
     ],
-    "X": 451.28583581542205,
-    "Y": 2621.0907727249528,
-    "Zoom": 0.44938740950504197
+    "X": 1648.4256764388265,
+    "Y": 3104.1337489965881,
+    "Zoom": 0.61028001150520828
   }
 }
