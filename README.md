@@ -4,7 +4,7 @@
 Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Family  
 Инструкция: [Инсоляция и затенение окружающей застройки.](#00)    
 Пример: [Пример реализации методики](#7)
-![Демо](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/demo.png) |
+![Демо](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/demo.png)
 <a name="00"><h1>Инсоляция и затенение окружающей застройки.</h1></a>
 ## **0 Оглавление.**
 
@@ -213,4 +213,5 @@ Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/mai
 <a name="6.1.1.1"><h5>Рис. 6.1.1.1 Легенда УГО семейств  окон, лоджий и балконов. </h5></a>
 ![FILI__Легенда УГО семейств](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/УГО_семейств.jpg)
 <a name="7"><h2>7  Пример реализации методики.</h2></a>
+![Демо](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/demo.png)
 ![](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/BlockInstruction.png)
