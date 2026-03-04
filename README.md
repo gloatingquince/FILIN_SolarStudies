@@ -1,4 +1,4 @@
-![filin_logo](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/filin_logo.png)  Методика расчета затенения окружающей застройки в среде Revit.
+![filin_logo](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/FILIN_LOGO.png)  Методика расчета затенения окружающей застройки в среде Revit.
 В этом репозитории собраны скрипты и инструкция по их применению.  
 Скрипты: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Dynamo  
 Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Family  
