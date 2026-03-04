@@ -50,12 +50,6 @@ Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/mai
 
 &nbsp;&nbsp;&nbsp;&nbsp;Вычисления координат солнца основаны на методике NOAA, погрешность результата от калькуляторов NOAA составляет ≈ 1°.
 
-**Сайт NOAA** \- [NOAA](https://www.noaa.gov/)
-
-**Калькулятор 1** \- [NOAA Solar Position Calculator](https://gml.noaa.gov/grad/solcalc/azel.html)
-
-**Калькулятор 3** \- [Solar Calculator \- NOAA Global Monitoring Laboratory](https://gml.noaa.gov/grad/solcalc/)
-
 &nbsp;&nbsp;&nbsp;&nbsp;Перед запуском скрипта необходимо убедиться, что модель подготовлена корректно.  
 Для расчета необходима корректная трехмерная геометрия окружающей застройки и проектируемого объекта.
 
