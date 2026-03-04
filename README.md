@@ -94,6 +94,7 @@ Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/mai
 
 <a name="1.2.1"><h4>Рисунок 1.2.1   Принципиальная схема к методике расчета инсоляции.</h4></a>
 ![Рисунок 1.2.1   Принципиальная схема к методике расчета инсоляции](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/Intruction.png)
+
 <a name="2"><h2>2   Аудит модели</h2></a>
 **Пропустить если расчет производится впервые**
 
