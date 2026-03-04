@@ -5,6 +5,7 @@ Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/mai
 Инструкция: [Инсоляция и затенение окружающей застройки.](#00)    
 Пример: [Пример реализации методики](#7)
 ![Демо](https://github.com/gloatingquince/FILIN_SolarStudies/blob/main/Presentation/demo.png)
+
 <a name="00"><h1>Инсоляция и затенение окружающей застройки.</h1></a>
 
 ## 0 Оглавление.
