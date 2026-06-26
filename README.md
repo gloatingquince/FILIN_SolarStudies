@@ -1,6 +1,7 @@
 <img src="/Presentation/FILIN_LOGO.png" width="150" height="100"><h1>Методика расчета затенения окружающей застройки в среде Revit.</h1>
 В этом репозитории собраны скрипты и инструкция по их применению.  
-Скрипты: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Dynamo  
+Скрипты: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Script_Dynamo  
+Пользовательские узлы: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Dynamo  
 Cемейства: https://github.com/gloatingquince/FILIN_SolarStudies/tree/main/Family  
 Инструкция: [Инсоляция и затенение окружающей застройки.](#00)    
 Пример: [Пример реализации методики](#7)
