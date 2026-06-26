@@ -1,0 +1,295 @@
+{
+  "Uuid": "b4822f3b-cf5b-465a-b6fb-10b49fdba530",
+  "IsCustomNode": true,
+  "Category": "FILIN_Dynamo",
+  "Description": "",
+  "Name": "RayBounce",
+  "ElementResolver": {
+    "ResolutionMap": {
+      "Autodesk.DesignScript.Geometry.Vector": {
+        "Key": "Autodesk.DesignScript.Geometry.Vector",
+        "Value": "ProtoGeometry.dll"
+      },
+      "Autodesk.DesignScript.Geometry.Point": {
+        "Key": "Autodesk.DesignScript.Geometry.Point",
+        "Value": "ProtoGeometry.dll"
+      },
+      "Revit.Elements.Views.View3D": {
+        "Key": "Revit.Elements.Views.View3D",
+        "Value": "RevitNodes.dll"
+      }
+    }
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "import clr\r\nclr.AddReference('RevitAPI')\r\nfrom Autodesk.Revit.DB import *\r\n\r\nclr.AddReference('ProtoGeometry')\r\nfrom Autodesk.DesignScript.Geometry import *\r\n\r\nclr.AddReference('RevitServices')\r\nfrom RevitServices.Persistence import DocumentManager\r\n\r\ndoc = DocumentManager.Instance.CurrentDBDocument\r\n\r\n# Units\r\nUIunit = Document.GetUnits(doc).GetFormatOptions(UnitType.UT_Length).DisplayUnits\r\n\r\n# Inputs\r\nif isinstance(IN[0], list):\r\n    points = [XYZ(\r\n        UnitUtils.ConvertToInternalUnits(i.X, UIunit),\r\n        UnitUtils.ConvertToInternalUnits(i.Y, UIunit),\r\n        UnitUtils.ConvertToInternalUnits(i.Z, UIunit)\r\n    ) for i in IN[0]]\r\nelse:\r\n    points = [XYZ(\r\n        UnitUtils.ConvertToInternalUnits(IN[0].X, UIunit),\r\n        UnitUtils.ConvertToInternalUnits(IN[0].Y, UIunit),\r\n        UnitUtils.ConvertToInternalUnits(IN[0].Z, UIunit)\r\n    )]\r\n\r\ndirection = XYZ(IN[1].X, IN[1].Y, IN[1].Z)\r\nview = UnwrapElement(IN[2])\r\n\r\nri = ReferenceIntersector(view)\r\nri.FindReferencesInRevitLinks = True\r\n\r\n# Главная логика\r\nresult = False\r\n\r\nfor p in points:\r\n    ref = ri.FindNearest(p, direction)\r\n    if ref is not None:\r\n        result = True\r\n        break  # сразу выходим — дальше проверять не нужно\r\n\r\nOUT = result",
+      "VariableInputPorts": true,
+      "Id": "99820efdd7b24b778d557a6fe9185efc",
+      "Inputs": [
+        {
+          "Id": "533ba5de28824712ab18913586e96d22",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "737828133f2f4c17ac0a4acb30648c53",
+          "Name": "IN[1]",
+          "Description": "Input #1",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        },
+        {
+          "Id": "4b4138be7eb8483bbbb6c493fbc0f946",
+          "Name": "IN[2]",
+          "Description": "Input #2",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "a153c443a70147ada7cdffc62efba034",
+          "Name": "OUT",
+          "Description": "Результат сценария Python",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Выполнение встроенного сценария IronPython."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Symbol, DynamoCore",
+      "NodeType": "InputNode",
+      "Parameter": {
+        "Name": "_Points",
+        "TypeName": "Autodesk.DesignScript.Geometry.Point",
+        "TypeRank": 1,
+        "DefaultValue": null,
+        "Description": ""
+      },
+      "Id": "4c4cef15b25c49078627a95af37adfd4",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "a72b95d9a0684ebfa4561887a638ae49",
+          "Name": "",
+          "Description": "Обозначение",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Параметр функции, использовать с пользовательскими узлами.\r\n\r\nМожно указать тип и значение параметра по умолчанию. Например,\r\n\r\nввод: var [], [].\r\nзначение: bool = false"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Output, DynamoCore",
+      "NodeType": "OutputNode",
+      "ElementResolver": null,
+      "Symbol": "Resault",
+      "Id": "a71dc48484c24711975515a19d6a9e02",
+      "Inputs": [
+        {
+          "Id": "f01fb56436bd4c2caead61a6e230a470",
+          "Name": "",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [],
+      "Replication": "Disabled",
+      "Description": "Результат функции, применять с пользовательскими узлами"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Symbol, DynamoCore",
+      "NodeType": "InputNode",
+      "Parameter": {
+        "Name": "_Direction",
+        "TypeName": "Autodesk.DesignScript.Geometry.Vector",
+        "TypeRank": 0,
+        "DefaultValue": null,
+        "Description": ""
+      },
+      "Id": "812e500b33714b46b00edd9ec338f4ae",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "8558efbab75a41b6a1fc510d48cb2bde",
+          "Name": "",
+          "Description": "Обозначение",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Параметр функции, использовать с пользовательскими узлами.\r\n\r\nМожно указать тип и значение параметра по умолчанию. Например,\r\n\r\nввод: var [], [].\r\nзначение: bool = false"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Symbol, DynamoCore",
+      "NodeType": "InputNode",
+      "Parameter": {
+        "Name": "_3D_View",
+        "TypeName": "Revit.Elements.Views.View3D",
+        "TypeRank": 0,
+        "DefaultValue": null,
+        "Description": ""
+      },
+      "Id": "26c47790f0324bb08d2cadbe271e269d",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "e24c961204f54034817591f4438e0141",
+          "Name": "",
+          "Description": "Обозначение",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Параметр функции, использовать с пользовательскими узлами.\r\n\r\nМожно указать тип и значение параметра по умолчанию. Например,\r\n\r\nввод: var [], [].\r\nзначение: bool = false"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "a153c443a70147ada7cdffc62efba034",
+      "End": "f01fb56436bd4c2caead61a6e230a470",
+      "Id": "38f6d71897384deabb0f67fbef65c37b"
+    },
+    {
+      "Start": "a72b95d9a0684ebfa4561887a638ae49",
+      "End": "533ba5de28824712ab18913586e96d22",
+      "Id": "8b118d5afbd54c5a9a2ad13587ec81a7"
+    },
+    {
+      "Start": "8558efbab75a41b6a1fc510d48cb2bde",
+      "End": "737828133f2f4c17ac0a4acb30648c53",
+      "Id": "cd46134d7f434531b426e1663ddd76c0"
+    },
+    {
+      "Start": "e24c961204f54034817591f4438e0141",
+      "End": "4b4138be7eb8483bbbb6c493fbc0f946",
+      "Id": "bb34f94352b54f949277ddbb9a345d89"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": false,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.6.1.8786",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "Фоновый просмотр",
+      "EyeX": 3058.1117497467553,
+      "EyeY": 6940.3405626128406,
+      "EyeZ": -401.16499339274583,
+      "LookX": -2657.7228872226028,
+      "LookY": -13726.488910542939,
+      "LookZ": -951.04508078215076,
+      "UpX": -0.86013328762812946,
+      "UpY": 0.40673664307584478,
+      "UpZ": -0.30779218751227966
+    },
+    "NodeViews": [
+      {
+        "ShowGeometry": true,
+        "Name": "Python Script",
+        "Id": "99820efdd7b24b778d557a6fe9185efc",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1321.2863307710911,
+        "Y": 530.16487581223009
+      },
+      {
+        "ShowGeometry": true,
+        "Name": "Input",
+        "Id": "4c4cef15b25c49078627a95af37adfd4",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 788.0,
+        "Y": 484.0
+      },
+      {
+        "ShowGeometry": true,
+        "Name": "Output",
+        "Id": "a71dc48484c24711975515a19d6a9e02",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 1488.0,
+        "Y": 532.0
+      },
+      {
+        "ShowGeometry": true,
+        "Name": "Input",
+        "Id": "812e500b33714b46b00edd9ec338f4ae",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 774.0,
+        "Y": 554.0
+      },
+      {
+        "ShowGeometry": true,
+        "Name": "Input",
+        "Id": "26c47790f0324bb08d2cadbe271e269d",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 876.0,
+        "Y": 622.0
+      }
+    ],
+    "Annotations": [
+      {
+        "Id": "befe1f7707724903a3cc4a88ef3c4482",
+        "Title": "<Нажмите здесь, чтобы изменить заголовок группы>",
+        "Nodes": [
+          "99820efdd7b24b778d557a6fe9185efc"
+        ],
+        "Left": 1311.2863307710911,
+        "Top": 261.16487581223009,
+        "Width": 177.36,
+        "Height": 389.0,
+        "FontSize": 36.0,
+        "InitialTop": 530.16487581223009,
+        "InitialHeight": 344.01165517651,
+        "TextblockHeight": 259.0,
+        "Background": "#FFC1D676"
+      }
+    ],
+    "X": -691.0,
+    "Y": -134.0,
+    "Zoom": 1.0
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "Uuid": "61635104-19c5-4b7a-908d-f72e919885e0",
+  "IsCustomNode": true,
+  "Category": "FILIN_Dynamo",
+  "Description": "",
+  "Name": "ListScope",
+  "ElementResolver": {
+    "ResolutionMap": {}
+  },
+  "Inputs": [],
+  "Outputs": [],
+  "Nodes": [
+    {
+      "ConcreteType": "PythonNodeModels.PythonNode, PythonNodeModels",
+      "NodeType": "PythonScriptNode",
+      "Code": "# IN[0] — ваш список из кортежей/списков\r\ndata = IN[0]\r\n\r\n# для каждого элемента берем первый и последний элементы\r\nOUT = (data[0], data[-1]) if len(data) >= 2 else data\r\n\r\n# Пример:\r\n# input  -> [(a, b), (a, b, c, d), (a, b, c)]\r\n# output -> [(a, b), (a, d), (a, c)]",
+      "VariableInputPorts": true,
+      "Id": "af61cac9acc747ecad3465cb52574b08",
+      "Inputs": [
+        {
+          "Id": "137cb3e37de043aa977227e16370ebda",
+          "Name": "IN[0]",
+          "Description": "Input #0",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [
+        {
+          "Id": "90017761fade40cd8d559127cc4d47ec",
+          "Name": "OUT",
+          "Description": "Результат сценария Python",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Выполнение встроенного сценария IronPython."
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Symbol, DynamoCore",
+      "NodeType": "InputNode",
+      "Parameter": {
+        "Name": "_List",
+        "TypeName": "var",
+        "TypeRank": 0,
+        "DefaultValue": null,
+        "Description": ""
+      },
+      "Id": "691c3e376b0c4a74b9b798f10074b382",
+      "Inputs": [],
+      "Outputs": [
+        {
+          "Id": "5fc7a1a86ed84236a0fe5b8766ec3b69",
+          "Name": "",
+          "Description": "Обозначение",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Replication": "Disabled",
+      "Description": "Параметр функции, использовать с пользовательскими узлами.\r\n\r\nМожно указать тип и значение параметра по умолчанию. Например,\r\n\r\nввод: var [], [].\r\nзначение: bool = false"
+    },
+    {
+      "ConcreteType": "Dynamo.Graph.Nodes.CustomNodes.Output, DynamoCore",
+      "NodeType": "OutputNode",
+      "ElementResolver": null,
+      "Symbol": "Output",
+      "Id": "4d324fb90a744a5f891c1adf9cfad216",
+      "Inputs": [
+        {
+          "Id": "c9fd3ad9fe294ec6bca47cece1fe9375",
+          "Name": "",
+          "Description": "",
+          "UsingDefaultValue": false,
+          "Level": 2,
+          "UseLevels": false,
+          "KeepListStructure": false
+        }
+      ],
+      "Outputs": [],
+      "Replication": "Disabled",
+      "Description": "Результат функции, применять с пользовательскими узлами"
+    }
+  ],
+  "Connectors": [
+    {
+      "Start": "90017761fade40cd8d559127cc4d47ec",
+      "End": "c9fd3ad9fe294ec6bca47cece1fe9375",
+      "Id": "d723f965cc24411fb0de1bb704f280c1"
+    },
+    {
+      "Start": "5fc7a1a86ed84236a0fe5b8766ec3b69",
+      "End": "137cb3e37de043aa977227e16370ebda",
+      "Id": "d49c8fc359c348738c85d393e7df148f"
+    }
+  ],
+  "Dependencies": [],
+  "NodeLibraryDependencies": [],
+  "Bindings": [],
+  "View": {
+    "Dynamo": {
+      "ScaleFactor": 1.0,
+      "HasRunWithoutCrash": false,
+      "IsVisibleInDynamoLibrary": true,
+      "Version": "2.6.1.8786",
+      "RunType": "Manual",
+      "RunPeriod": "1000"
+    },
+    "Camera": {
+      "Name": "Фоновый просмотр",
+      "EyeX": 3058.1117497467553,
+      "EyeY": 6940.3405626128406,
+      "EyeZ": -401.16499339274583,
+      "LookX": -2657.7228872226028,
+      "LookY": -13726.488910542939,
+      "LookZ": -951.04508078215076,
+      "UpX": -0.86013328762812946,
+      "UpY": 0.40673664307584478,
+      "UpZ": -0.30779218751227966
+    },
+    "NodeViews": [
+      {
+        "ShowGeometry": true,
+        "Name": "First and last vectors with ierarchie",
+        "Id": "af61cac9acc747ecad3465cb52574b08",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 386.0,
+        "Y": 282.0
+      },
+      {
+        "ShowGeometry": true,
+        "Name": "Input",
+        "Id": "691c3e376b0c4a74b9b798f10074b382",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 236.0,
+        "Y": 276.0
+      },
+      {
+        "ShowGeometry": true,
+        "Name": "Output",
+        "Id": "4d324fb90a744a5f891c1adf9cfad216",
+        "IsSetAsInput": false,
+        "IsSetAsOutput": false,
+        "Excluded": false,
+        "X": 685.0,
+        "Y": 276.0
+      }
+    ],
+    "Annotations": [],
+    "X": 0.0,
+    "Y": 0.0,
+    "Zoom": 1.0
+  }
+}
